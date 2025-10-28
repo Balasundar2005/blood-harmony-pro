@@ -21,10 +21,26 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="text-lg px-8">
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="text-lg px-8"
+              onClick={() => {
+                const element = document.getElementById('request');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Request Blood <ArrowRight className="ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-lg px-8 border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              onClick={() => {
+                const element = document.getElementById('donate');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Become a Donor
             </Button>
           </div>
