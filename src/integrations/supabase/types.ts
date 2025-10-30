@@ -124,6 +124,60 @@ export type Database = {
         }
         Relationships: []
       }
+      donation_records: {
+        Row: {
+          blood_bank_id: string | null
+          blood_type: Database["public"]["Enums"]["blood_type"]
+          created_at: string | null
+          donation_date: string
+          donor_id: string
+          id: string
+          location: string
+          notes: string | null
+          units_donated: number
+          updated_at: string | null
+        }
+        Insert: {
+          blood_bank_id?: string | null
+          blood_type: Database["public"]["Enums"]["blood_type"]
+          created_at?: string | null
+          donation_date: string
+          donor_id: string
+          id?: string
+          location: string
+          notes?: string | null
+          units_donated?: number
+          updated_at?: string | null
+        }
+        Update: {
+          blood_bank_id?: string | null
+          blood_type?: Database["public"]["Enums"]["blood_type"]
+          created_at?: string | null
+          donation_date?: string
+          donor_id?: string
+          id?: string
+          location?: string
+          notes?: string | null
+          units_donated?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_records_blood_bank_id_fkey"
+            columns: ["blood_bank_id"]
+            isOneToOne: false
+            referencedRelation: "blood_banks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_records_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "donors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donors: {
         Row: {
           age: number
@@ -169,6 +223,33 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           weight?: number
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string | null
+          email_notifications: boolean | null
+          id: string
+          sms_notifications: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          sms_notifications?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          sms_notifications?: boolean | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

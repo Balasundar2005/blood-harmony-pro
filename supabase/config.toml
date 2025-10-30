@@ -1,1 +1,4 @@
 project_id = "vkfiervotnbcbadnvtsw"
+
+[functions.notify-donors]
+verify_jwt = false

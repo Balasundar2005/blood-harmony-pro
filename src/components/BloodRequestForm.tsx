@@ -71,6 +71,27 @@ const BloodRequestForm = () => {
       if (error) throw error;
 
       toast.success("Request submitted successfully! We're notifying nearby donors and blood banks.");
+      
+      // Call the notification edge function
+      try {
+        const { data: requestData } = await supabase
+          .from('blood_requests')
+          .select('id')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (requestData) {
+          await supabase.functions.invoke('notify-donors', {
+            body: { requestId: requestData.id }
+          });
+        }
+      } catch (notifyError) {
+        console.error("Error notifying donors:", notifyError);
+        // Don't show error to user, request was still created
+      }
+
       setFormData({
         patientName: "",
         contactNumber: "",

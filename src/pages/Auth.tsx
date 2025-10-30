@@ -96,13 +96,19 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary px-4 py-12">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-background relative overflow-hidden px-4 py-12">
+      {/* Animated background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '1s' }} />
+      </div>
+
+      <Card className="w-full max-w-md shadow-2xl bg-card/80 backdrop-blur-xl border-2 border-primary/20 relative z-10 animate-scale-in">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="w-8 h-8 text-primary fill-primary" />
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
+            <Heart className="w-8 h-8 text-primary-foreground fill-current" />
           </div>
-          <CardTitle className="text-2xl">Welcome to LifeLink</CardTitle>
+          <CardTitle className="text-3xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Welcome to LifeLink</CardTitle>
           <CardDescription>Sign in or create an account to continue</CardDescription>
         </CardHeader>
         <CardContent>
@@ -136,8 +142,26 @@ const Auth = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full animate-pulse-glow" disabled={loading}>
                   {loading ? "Signing In..." : "Sign In"}
+                </Button>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => navigate('/auth-otp')}
+                >
+                  Sign in with Phone (OTP)
                 </Button>
               </form>
             </TabsContent>
@@ -177,8 +201,26 @@ const Auth = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full animate-pulse-glow" disabled={loading}>
                   {loading ? "Creating Account..." : "Create Account"}
+                </Button>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => navigate('/auth-otp')}
+                >
+                  Sign up with Phone (OTP)
                 </Button>
               </form>
             </TabsContent>

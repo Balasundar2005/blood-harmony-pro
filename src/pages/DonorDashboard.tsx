@@ -31,11 +31,37 @@ const DonorDashboard = () => {
 
   const fetchDonations = async () => {
     try {
-      // For now, using mock data since donation_records table needs to be created
-      // TODO: Create donation_records table in migration
-      setDonations([]);
+      if (!user) return;
+
+      // First get the donor record
+      const { data: donorData, error: donorError } = await supabase
+        .from('donors')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (donorError) {
+        if (donorError.code === 'PGRST116') {
+          // No donor record found
+          setDonations([]);
+          return;
+        }
+        throw donorError;
+      }
+
+      // Then get donation records
+      const { data, error } = await supabase
+        .from('donation_records')
+        .select('*')
+        .eq('donor_id', donorData.id)
+        .order('donation_date', { ascending: false });
+
+      if (error) throw error;
+      setDonations(data || []);
     } catch (error: any) {
-      toast.error("Failed to fetch donations");
+      console.error("Error fetching donations:", error);
+      // Don't show error toast, just set empty array
+      setDonations([]);
     } finally {
       setLoading(false);
     }
