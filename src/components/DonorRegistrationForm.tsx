@@ -15,7 +15,10 @@ import { z } from "zod";
 const donorSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters").max(100),
   age: z.number().min(18, "Must be at least 18 years old").max(65, "Must be under 65 years old"),
-  contactNumber: z.string().min(10, "Invalid phone number").max(20),
+  contactNumber: z.string()
+    .regex(/^\+91[0-9]{10}$/, "Must be +91 followed by 10 digits")
+    .min(13, "Must be +91 followed by 10 digits")
+    .max(13, "Must be +91 followed by 10 digits"),
   email: z.string().email("Invalid email address").max(255),
   bloodType: z.string().min(1, "Blood type required"),
   weight: z.number().min(50, "Weight must be at least 50 kg"),
@@ -152,11 +155,19 @@ const DonorRegistrationForm = () => {
                     <Input 
                       id="donor-phone" 
                       type="tel" 
-                      placeholder="+1 (555) 000-0000" 
+                      placeholder="+91XXXXXXXXXX" 
                       value={formData.contactNumber}
-                      onChange={(e) => setFormData({...formData, contactNumber: e.target.value})}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        if (!value.startsWith('+91')) {
+                          value = '+91' + value.replace(/^\+91/, '');
+                        }
+                        value = value.slice(0, 13);
+                        setFormData({...formData, contactNumber: value});
+                      }}
                       required 
                     />
+                    <p className="text-xs text-muted-foreground">Format: +91 followed by 10 digits</p>
                   </div>
                   
                   <div className="space-y-2">

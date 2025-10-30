@@ -40,10 +40,13 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {user ? (
             <>
+              <Button variant="outline" onClick={() => navigate('/dashboard')} className="hidden md:flex">
+                My Dashboard
+              </Button>
               <span className="text-sm text-muted-foreground hidden md:inline">
                 {user.email}
               </span>
-              <Button variant="outline" onClick={handleSignOut}>
+              <Button variant="outline" onClick={handleSignOut} className="animate-pulse-glow">
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
               </Button>
@@ -51,7 +54,7 @@ const Header = () => {
           ) : (
             <>
               <Button variant="outline" onClick={() => navigate('/auth')}>Sign In</Button>
-              <Button variant="hero" onClick={() => navigate('/auth')}>Get Started</Button>
+              <Button variant="default" onClick={() => navigate('/auth')} className="animate-pulse-glow">Get Started</Button>
             </>
           )}
         </div>
