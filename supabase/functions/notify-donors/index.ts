@@ -34,13 +34,11 @@ serve(async (req) => {
 
     console.log('Blood request:', request);
 
-    // Find matching donors (same blood type and location)
+    // Find ALL available donors (notify everyone about urgent requests)
     const { data: donors, error: donorsError } = await supabaseClient
       .from('donors')
       .select('*')
-      .eq('blood_type', request.blood_type)
-      .eq('is_available', true)
-      .ilike('location', `%${request.location}%`);
+      .eq('is_available', true);
 
     if (donorsError) {
       throw new Error(`Failed to fetch donors: ${donorsError.message}`);
@@ -52,9 +50,14 @@ serve(async (req) => {
     // For now, we'll just log the notification
     if (donors && donors.length > 0) {
       for (const donor of donors) {
-        console.log(`Notifying donor ${donor.full_name} at ${donor.contact_number}`);
+        const isMatchingBloodType = donor.blood_type === request.blood_type;
+        const isNearby = donor.location.toLowerCase().includes(request.location.toLowerCase());
+        const priority = isMatchingBloodType && isNearby ? 'HIGH' : isMatchingBloodType ? 'MEDIUM' : 'LOW';
+        
+        console.log(`[${priority} PRIORITY] Notifying donor ${donor.full_name} (${donor.blood_type}) at ${donor.contact_number}`);
+        console.log(`Request: ${request.blood_type} blood needed at ${request.hospital_name}, ${request.location}`);
         // TODO: Integrate with SMS/Email service
-        // Example: await sendSMS(donor.contact_number, `Urgent: ${request.blood_type} blood needed at ${request.hospital_name}`);
+        // Example: await sendSMS(donor.contact_number, `[${priority}] Blood Request: ${request.blood_type} needed at ${request.hospital_name}`);
       }
     }
 
