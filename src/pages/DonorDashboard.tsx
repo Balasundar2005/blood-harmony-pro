@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Award, Droplet, Calendar, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
+import DonorNotifications from "@/components/DonorNotifications";
 
 interface DonationRecord {
   id: string;
@@ -26,6 +27,12 @@ const DonorDashboard = () => {
       navigate("/auth");
       return;
     }
+    
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    
     fetchDonations();
   }, [user, navigate]);
 
@@ -94,6 +101,11 @@ const DonorDashboard = () => {
             <p className="text-muted-foreground text-lg">
               Track your life-saving contributions and achievements
             </p>
+          </div>
+
+          {/* Real-time Notifications Section */}
+          <div className="mb-8">
+            <DonorNotifications />
           </div>
 
           {/* Badge Card */}

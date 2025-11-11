@@ -44,28 +44,55 @@ serve(async (req) => {
       throw new Error(`Failed to fetch donors: ${donorsError.message}`);
     }
 
-    console.log(`Found ${donors?.length || 0} matching donors`);
+    console.log(`Found ${donors?.length || 0} available donors`);
 
-    // In a real application, you would send SMS/email notifications here
-    // For now, we'll just log the notification
+    // Create instant notifications for all matching donors
+    const notificationsCreated: string[] = [];
+    
     if (donors && donors.length > 0) {
       for (const donor of donors) {
         const isMatchingBloodType = donor.blood_type === request.blood_type;
-        const isNearby = donor.location.toLowerCase().includes(request.location.toLowerCase());
-        const priority = isMatchingBloodType && isNearby ? 'HIGH' : isMatchingBloodType ? 'MEDIUM' : 'LOW';
+        const isNearby = donor.location.toLowerCase().includes(request.location.toLowerCase()) || 
+                        request.location.toLowerCase().includes(donor.location.toLowerCase());
         
-        console.log(`[${priority} PRIORITY] Notifying donor ${donor.full_name} (${donor.blood_type}) at ${donor.contact_number}`);
-        console.log(`Request: ${request.blood_type} blood needed at ${request.hospital_name}, ${request.location}`);
-        // TODO: Integrate with SMS/Email service
-        // Example: await sendSMS(donor.contact_number, `[${priority}] Blood Request: ${request.blood_type} needed at ${request.hospital_name}`);
+        // Determine priority based on blood type match and location proximity
+        let priority = 'LOW';
+        if (isMatchingBloodType && isNearby) {
+          priority = 'HIGH';
+        } else if (isMatchingBloodType) {
+          priority = 'MEDIUM';
+        }
+        
+        // Create notification message
+        const message = `🩸 ${priority} PRIORITY: ${request.blood_type} blood needed at ${request.hospital_name}, ${request.location}. ${request.units_required} units required. Urgency: ${request.urgency.toUpperCase()}. Contact: ${request.contact_number}`;
+        
+        // Insert notification into database for instant delivery
+        const { error: notifyError } = await supabaseClient
+          .from('donor_notifications')
+          .insert({
+            donor_id: donor.id,
+            blood_request_id: requestId,
+            message: message,
+            priority: priority
+          });
+        
+        if (notifyError) {
+          console.error(`Failed to notify donor ${donor.full_name}:`, notifyError);
+        } else {
+          notificationsCreated.push(donor.full_name);
+          console.log(`✅ [${priority}] Notified ${donor.full_name} (${donor.blood_type}) - ${donor.contact_number}`);
+        }
       }
     }
+
+    console.log(`Successfully created ${notificationsCreated.length} notifications`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Notified ${donors?.length || 0} matching donors`,
-        donorsNotified: donors?.length || 0
+        message: `Instantly notified ${notificationsCreated.length} donors`,
+        donorsNotified: notificationsCreated.length,
+        notifiedDonors: notificationsCreated
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

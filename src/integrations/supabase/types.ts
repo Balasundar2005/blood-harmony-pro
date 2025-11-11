@@ -178,6 +178,54 @@ export type Database = {
           },
         ]
       }
+      donor_notifications: {
+        Row: {
+          blood_request_id: string
+          created_at: string
+          donor_id: string
+          id: string
+          is_read: boolean
+          message: string
+          priority: string
+          updated_at: string
+        }
+        Insert: {
+          blood_request_id: string
+          created_at?: string
+          donor_id: string
+          id?: string
+          is_read?: boolean
+          message: string
+          priority: string
+          updated_at?: string
+        }
+        Update: {
+          blood_request_id?: string
+          created_at?: string
+          donor_id?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          priority?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_notifications_blood_request_id_fkey"
+            columns: ["blood_request_id"]
+            isOneToOne: false
+            referencedRelation: "blood_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donor_notifications_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "donors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donors: {
         Row: {
           age: number
