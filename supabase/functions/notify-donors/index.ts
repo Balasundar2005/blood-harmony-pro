@@ -12,24 +12,55 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Get authenticated user from JWT
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
     const { requestId } = await req.json();
+    
+    if (!requestId) {
+      return new Response(
+        JSON.stringify({ error: 'Request ID is required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
 
     console.log('Notifying donors for request:', requestId);
 
-    // Get the blood request details
+    // Get the blood request details and verify ownership
     const { data: request, error: requestError } = await supabaseClient
       .from('blood_requests')
       .select('*')
       .eq('id', requestId)
+      .eq('user_id', user.id)
       .single();
 
-    if (requestError) {
-      throw new Error(`Failed to fetch request: ${requestError.message}`);
+    if (requestError || !request) {
+      return new Response(
+        JSON.stringify({ error: 'Blood request not found or access denied' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+      );
     }
 
     console.log('Blood request:', request);
