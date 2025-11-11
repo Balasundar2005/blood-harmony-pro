@@ -15,10 +15,7 @@ serve(async (req) => {
     // Verify authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized - Authentication required' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      throw new Error('Unauthorized: Missing authentication token');
     }
 
     const supabaseClient = createClient(
@@ -26,27 +23,21 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get authenticated user from JWT
+    // Verify the JWT token and get the authenticated user
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication token' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
+      throw new Error('Unauthorized: Invalid authentication token');
     }
 
     const { requestId } = await req.json();
-    
+
     if (!requestId) {
-      return new Response(
-        JSON.stringify({ error: 'Request ID is required' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+      throw new Error('Bad Request: requestId is required');
     }
 
-    console.log('Notifying donors for request:', requestId);
+    console.log('Notifying donors for request:', requestId, 'by user:', user.id);
 
     // Get the blood request details and verify ownership
     const { data: request, error: requestError } = await supabaseClient
@@ -57,10 +48,7 @@ serve(async (req) => {
       .single();
 
     if (requestError || !request) {
-      return new Response(
-        JSON.stringify({ error: 'Blood request not found or access denied' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
+      throw new Error('Blood request not found or access denied');
     }
 
     console.log('Blood request:', request);
